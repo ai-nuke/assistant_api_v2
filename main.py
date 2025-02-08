@@ -9,7 +9,7 @@ import openai
 
 app = Flask(__name__)
 OPENAI_API_KEY = os.environ['OPENAI_API_KEY']
-client = OpenAI(api_key=OPENAI_API_KEY)
+client = OpenAI(api_key=OPENAI_API_KEY, default_headers={"OpenAI-Beta": "assistants=v2"})
 
 # Load assistant ID from file or create new one
 assistant_id = functions.create_assistant(client)
