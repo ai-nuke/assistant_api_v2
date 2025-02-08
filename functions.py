@@ -8,7 +8,7 @@ from prompts import assistant_instructions
 OPENAI_API_KEY = os.environ['OPENAI_API_KEY']
 
 # Init OpenAI Client
-client = OpenAI(api_key=OPENAI_API_KEY, default_headers={"OpenAI-Beta": "assistants=v2"})
+client = OpenAI(api_key=OPENAI_API_KEY)
 
 # Send data to webhook
 # Send data to webhook
