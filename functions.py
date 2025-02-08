@@ -67,7 +67,7 @@ def create_assistant(client):
                     }
                 }
             }],
-            file_ids=file_ids
+            files=file_ids
         )
 
         with open(assistant_file_path, 'w') as file:
