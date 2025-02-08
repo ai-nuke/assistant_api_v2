@@ -36,56 +36,38 @@ def create_assistant(client):
             assistant_id = assistant_data['assistant_id']
             print("Loaded existing assistant ID.")
     else:
-        vector_store = client.beta.vector_stores.create(name="Knowledge Base")
-
-        # Upload .docx file
-        docx_file_path = "knowledge.docx"
-        if os.path.exists(docx_file_path):
-            with open(docx_file_path, "rb") as file:
-                client.beta.vector_stores.file_batches.upload_and_poll(
-                    vector_store_id=vector_store.id,
-                    files=[file]
-                )
-
-        # Upload .pdf file
-        json_file_path = "suburbs.json"
-        if os.path.exists(json_file_path):
-            with open(json_file_path, "rb") as file:
-                client.beta.vector_stores.file_batches.upload_and_poll(
-                    vector_store_id=vector_store.id,
-                    files=[file]
-                )
+        # Upload files
+        file_ids = []
+        for filename in ["knowledge.docx", "suburbs.json"]:
+            if os.path.exists(filename):
+                with open(filename, "rb") as file:
+                    uploaded_file = client.files.create(
+                        file=file,
+                        purpose="assistants"
+                    )
+                    file_ids.append(uploaded_file.id)
 
         assistant = client.beta.assistants.create(
             instructions=assistant_instructions,
-            model="gpt-4o",
-            tools=[
-                {
-                    "type": "file_search"
-                },
-                {
-                    "type": "function",
-                    "function": {
-                        "name": "send_data",
-                        "description": "Send summary data to the webhook.",
-                        "parameters": {
-                            "type": "object",
-                            "properties": {
-                                "summary": {
-                                    "type": "string",
-                                    "description": "Summary of the conversation."
-                                }
-                            },
-                            "required": ["summary"]
-                        }
+            model="gpt-4-1106-preview",
+            tools=[{
+                "type": "function",
+                "function": {
+                    "name": "send_data",
+                    "description": "Send summary data to the webhook.",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "summary": {
+                                "type": "string",
+                                "description": "Summary of the conversation."
+                            }
+                        },
+                        "required": ["summary"]
                     }
                 }
-            ],
-            tool_resources={
-                "file_search": {
-                    "vector_store_ids": [vector_store.id]
-                }
-            }
+            }],
+            file_ids=file_ids
         )
 
         with open(assistant_file_path, 'w') as file:
